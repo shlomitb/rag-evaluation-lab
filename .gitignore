@@ -1,0 +1,44 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# PyCharm / JetBrains IDE
+.idea/
+*.iml
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Local databases and vector-store data
+chroma_db/
+.chroma/
+*.sqlite3
+*.db
+
+# Generated evaluation results and reports
+reports/generated/
+evaluation_results/
+*.log
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local temporary files
+*.tmp
+*.bak
