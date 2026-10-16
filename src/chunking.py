@@ -1,5 +1,4 @@
-
-
+"""Split text into smaller, overlapping chunks for retrieval."""
 
 
 def chunk_text(

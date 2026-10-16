@@ -1,4 +1,6 @@
 
+"""Load text documents from a directory and preserve their source filenames."""
+
 from pathlib import Path
 
 
