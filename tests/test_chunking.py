@@ -44,3 +44,23 @@ def test_invalid_overlap_is_rejected() -> None:
 
     with pytest.raises(ValueError, match="overlap must be smaller"):
         chunk_text("Hello", chunk_size=5, overlap=5)
+
+
+
+
+def test_chunking_preserves_all_text_when_reconstructed() -> None:
+    original_text = "The quick brown fox jumps over the lazy dog."
+
+    overlap = 5
+    chunks = chunk_text(
+        original_text,
+        chunk_size=12,
+        overlap=overlap,
+    )
+
+    reconstructed = chunks[0] + "".join(
+        chunk[overlap:] for chunk in chunks[1:]
+    )
+
+    assert reconstructed == original_text
+
