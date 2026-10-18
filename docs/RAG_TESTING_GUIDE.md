@@ -363,6 +363,120 @@ Expand the dataset with more challenging questions, including paraphrases, quest
 
 Keep this baseline for comparison rather than replacing it with later results. When comparing configurations, record the changes and use a consistent evaluation set and relevance-labeling approach.
 
+
+### Testing difficult cases and edge conditions
+
+A good evaluation dataset should test more than ordinary questions that closely match the wording of the source documents. We need to deliberately look for situations where the system might fail.
+
+This is similar to traditional software QA: happy-path tests establish that the normal workflow works, while boundary, negative, and error cases help reveal weaknesses.
+
+#### Types of difficult RAG test cases
+
+**1. Paraphrased questions**
+
+The question expresses the same meaning using different words.
+
+Example: "What's the delivery window for regular shipping?"
+
+Purpose: Test whether retrieval understands meaning rather than depending too heavily on similar wording.
+
+**2. Exceptions and boundary conditions**
+
+The correct answer depends on a special rule or an important boundary.
+
+Example: "Can I return a defective item after 45 days?"
+
+The standard return window is 30 days, but defective items may be returned within 60 days.
+
+Purpose: Test whether retrieval finds the exception rather than returning only the general rule.
+
+**3. Multi-fact questions**
+
+The question requires information from more than one chunk.
+
+Example: "How much does express shipping cost, and how long does it take?"
+
+Purpose: Test whether retrieval finds all the information needed for a complete answer, not just one relevant fact.
+
+**4. Unanswerable questions**
+
+The source documents do not contain the requested information.
+
+Example: "Does the wireless mouse support Bluetooth 5.3?"
+
+Our product catalog does not specify this feature.
+
+Purpose: Test whether the system can recognize that the available documents do not provide the requested fact. Retrieving vaguely related information must not be treated as proof that the question is answerable.
+
+**5. Noisy or ambiguous questions**
+
+The question contains typos, incomplete wording, or insufficient detail.
+
+Examples:
+- "how long shiping take?"
+- "How long can I return it?"
+
+Purpose: Test robustness to imperfect user input. Ambiguous questions may require clarification rather than a single assumed interpretation.
+
+#### Representing unanswerable questions
+
+Our original evaluation dataset associates every question with at least one relevant chunk. That assumption does not hold for unanswerable questions.
+
+We can represent an unanswerable question explicitly:
+
+```json
+{
+  "question": "Does the wireless mouse support Bluetooth 5.3?",
+  "relevant_chunk_ids": [],
+  "answerable": false
+}
+```
+
+This requires us to update the evaluation data validation and metrics. We must not pass an empty relevance set into a metric that expects at least one relevant chunk.
+
+#### Evaluate different failure modes separately
+
+Hit Rate@K and MRR measure whether relevant chunks are retrieved and how highly they are ranked. They do not, by themselves, measure whether a system correctly handles unanswerable questions.
+
+We should therefore report results by case type, such as paraphrases, exceptions, multi-fact questions, and unanswerable questions. An overall score can hide a weakness in one category.
+
+For multi-fact questions, we must define all required relevant chunks and decide whether success requires retrieving every required chunk or at least one of them. The evaluation criteria should match the question's requirements.
+
+#### Keep retrieval and answer evaluation separate
+
+Retrieval evaluation asks whether the necessary information was found.
+
+Answer evaluation asks whether the generated answer is correct, complete, relevant, and supported by the retrieved context.
+
+A retrieval system might find the right chunks while a later LLM still produces an incorrect answer. Conversely, a model might sometimes answer correctly using prior knowledge even when retrieval fails.
+
+Testing these stages separately makes failures easier to diagnose.
+
+### Experiment: How retrieval depth affects results
+
+We compared retrieval with `top_k=3` and `top_k=5` using the same 20-question evaluation dataset and the same local embedding model.
+
+| Metric | Top 3 | Top 5 |
+|---|---:|---:|
+| Hit Rate@K (answerable questions only) | 0.944 | 1.000 |
+| MRR (answerable questions only) | 0.944 | 0.958 |
+| Multi-fact completeness | 0.500 | 1.000 |
+
+**Observations**
+
+- Increasing `top_k` from 3 to 5 allowed the retriever to find a relevant chunk for all 18 answerable questions.
+- The multi-fact completeness rate increased from 50% to 100%. Both questions now had all required chunks within the top five results.
+- The paraphrased shipping question was the main ranking weakness: its relevant chunk was not in the top three, but appeared at rank 4 in the top-five results.
+- The two unanswerable questions remain outside Hit Rate and MRR. Retrieving related product information does not establish that the requested feature is documented.
+
+**Conclusion**
+
+For this dataset, the two answerable retrieval failures at `top_k=3` were resolved by retrieving more chunks. This indicates a retrieval-depth issue, although the paraphrased question's lower rank suggests that query wording and embedding similarity are also worth investigating.
+
+Increasing `top_k` is not automatically a complete solution. More retrieved chunks may introduce irrelevant context, so future answer-generation tests should examine whether the additional context improves answer completeness without reducing correctness or grounding.
+
+These results describe our current small test dataset; they do not establish that `top_k=5` is universally optimal.
+
 ## 10. Our project roadmap
 
 We will build and test the system incrementally.

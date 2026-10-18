@@ -1,42 +1,152 @@
+
 [
   {
     "question": "How long does standard shipping take?",
-    "relevant_chunk_ids": ["shipping_policy.txt:2"]
+    "relevant_chunk_ids": ["shipping_policy.txt:2"],
+    "answerable": true,
+    "case_type": "baseline",
+    "require_all_relevant_chunks": false
   },
   {
     "question": "How much does standard shipping cost?",
-    "relevant_chunk_ids": ["shipping_policy.txt:0"]
+    "relevant_chunk_ids": ["shipping_policy.txt:0"],
+    "answerable": true,
+    "case_type": "baseline",
+    "require_all_relevant_chunks": false
   },
   {
     "question": "What order total qualifies for free standard shipping?",
-    "relevant_chunk_ids": ["shipping_policy.txt:1"]
+    "relevant_chunk_ids": ["shipping_policy.txt:1"],
+    "answerable": true,
+    "case_type": "baseline",
+    "require_all_relevant_chunks": false
   },
   {
     "question": "How long does express shipping take?",
-    "relevant_chunk_ids": ["shipping_policy.txt:4"]
+    "relevant_chunk_ids": ["shipping_policy.txt:4"],
+    "answerable": true,
+    "case_type": "baseline",
+    "require_all_relevant_chunks": false
   },
   {
     "question": "Are shipping delivery times guaranteed?",
-    "relevant_chunk_ids": ["shipping_policy.txt:5"]
+    "relevant_chunk_ids": ["shipping_policy.txt:5"],
+    "answerable": true,
+    "case_type": "baseline",
+    "require_all_relevant_chunks": false
   },
   {
     "question": "How much does the wireless mouse cost?",
-    "relevant_chunk_ids": ["product_catalog.txt:0"]
+    "relevant_chunk_ids": ["product_catalog.txt:0"],
+    "answerable": true,
+    "case_type": "baseline",
+    "require_all_relevant_chunks": false
   },
   {
     "question": "What warranty does the mechanical keyboard have?",
-    "relevant_chunk_ids": ["product_catalog.txt:1"]
+    "relevant_chunk_ids": ["product_catalog.txt:1"],
+    "answerable": true,
+    "case_type": "baseline",
+    "require_all_relevant_chunks": false
   },
   {
     "question": "How many days do I have to return an item?",
-    "relevant_chunk_ids": ["return_policy.txt:0"]
+    "relevant_chunk_ids": ["return_policy.txt:0"],
+    "answerable": true,
+    "case_type": "baseline",
+    "require_all_relevant_chunks": false
   },
   {
     "question": "Do I need a receipt to return an item?",
-    "relevant_chunk_ids": ["return_policy.txt:2"]
+    "relevant_chunk_ids": ["return_policy.txt:2"],
+    "answerable": true,
+    "case_type": "baseline",
+    "require_all_relevant_chunks": false
   },
   {
     "question": "How long can I wait to return a defective item?",
-    "relevant_chunk_ids": ["return_policy.txt:5"]
+    "relevant_chunk_ids": ["return_policy.txt:5"],
+    "answerable": true,
+    "case_type": "baseline",
+    "require_all_relevant_chunks": false
+  },
+  {
+    "question": "What's the delivery window for regular shipping?",
+    "relevant_chunk_ids": ["shipping_policy.txt:2"],
+    "answerable": true,
+    "case_type": "paraphrase",
+    "require_all_relevant_chunks": false
+  },
+  {
+    "question": "What's the price tag on the wireless mouse?",
+    "relevant_chunk_ids": ["product_catalog.txt:0"],
+    "answerable": true,
+    "case_type": "paraphrase",
+    "require_all_relevant_chunks": false
+  },
+  {
+    "question": "Can I return a faulty product after 45 days?",
+    "relevant_chunk_ids": ["return_policy.txt:5"],
+    "answerable": true,
+    "case_type": "exception",
+    "require_all_relevant_chunks": false
+  },
+  {
+    "question": "Can I return something marked final sale?",
+    "relevant_chunk_ids": ["return_policy.txt:4"],
+    "answerable": true,
+    "case_type": "exception",
+    "require_all_relevant_chunks": false
+  },
+  {
+    "question": "What does express shipping cost, and how long does it take?",
+    "relevant_chunk_ids": [
+      "shipping_policy.txt:3",
+      "shipping_policy.txt:4"
+    ],
+    "answerable": true,
+    "case_type": "multi_fact",
+    "require_all_relevant_chunks": true
+  },
+  {
+    "question": "What is the standard return window, and what is the exception for defective items?",
+    "relevant_chunk_ids": [
+      "return_policy.txt:0",
+      "return_policy.txt:5"
+    ],
+    "answerable": true,
+    "case_type": "multi_fact",
+    "require_all_relevant_chunks": true
+  },
+  {
+    "question": "Does the wireless mouse support Bluetooth 5.3?",
+    "relevant_chunk_ids": [],
+    "answerable": false,
+    "case_type": "unanswerable",
+    "require_all_relevant_chunks": false
+  },
+  {
+    "question": "Does the mechanical keyboard have RGB lighting?",
+    "relevant_chunk_ids": [],
+    "answerable": false,
+    "case_type": "unanswerable",
+    "require_all_relevant_chunks": false
+  },
+  {
+    "question": "how long shiping take?",
+    "relevant_chunk_ids": ["shipping_policy.txt:2"],
+    "answerable": true,
+    "case_type": "typo",
+    "require_all_relevant_chunks": false
+  },
+  {
+    "question": "How long can I return it?",
+    "relevant_chunk_ids": [
+      "return_policy.txt:0",
+      "return_policy.txt:5"
+    ],
+    "answerable": true,
+    "case_type": "ambiguous",
+    "require_all_relevant_chunks": false
   }
 ]
