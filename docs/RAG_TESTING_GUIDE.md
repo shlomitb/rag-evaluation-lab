@@ -334,6 +334,35 @@ A useful evaluation process should:
 
 Small evaluation datasets are useful for learning and regression checks, but their scores may not generalize to real-world users. We should gradually expand the dataset to cover different question types and failure cases.
 
+### First retrieval baseline
+
+**Date:** October 2026
+
+**Configuration:** Local Sentence Transformers embeddings, semantic chunking, cosine-similarity retrieval, top 3 results, 10 evaluation questions.
+
+| Metric | Baseline result |
+|---|---:|
+| Evaluation questions | 10 |
+| Hit Rate@3 | 1.000 (100%) |
+| Mean Reciprocal Rank | 1.000 |
+| Relevant chunk ranked first | 10 out of 10 |
+
+All 10 questions retrieved their expected relevant chunk at rank 1.
+
+#### Interpretation
+
+The baseline demonstrates that the current system retrieves the expected chunks for this initial evaluation dataset. It gives us a reference point for future experiments.
+
+However, the dataset is small and primarily contains direct factual questions about three short documents. The results do not establish that the system will perform equally well on paraphrased, ambiguous, multi-fact, or otherwise difficult questions.
+
+Some secondary results are related to the question but are not themselves the expected relevant chunk. This may matter when several retrieved chunks are supplied to an answer-generating LLM.
+
+#### Next evaluation improvement
+
+Expand the dataset with more challenging questions, including paraphrases, questions about exceptions, questions requiring multiple facts, and questions for which the documents contain no answer. Verify relevance labels independently of retrieval results.
+
+Keep this baseline for comparison rather than replacing it with later results. When comparing configurations, record the changes and use a consistent evaluation set and relevance-labeling approach.
+
 ## 10. Our project roadmap
 
 We will build and test the system incrementally.
