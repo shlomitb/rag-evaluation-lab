@@ -158,6 +158,89 @@ Hit Rate@K tells us whether a relevant result appears within the cutoff. MRR tel
 
 A system can have a good Hit Rate@3 but a weaker MRR if it often finds the right chunk only at rank 3.
 
+### Building a retrieval evaluation dataset
+
+A retrieval evaluation dataset contains a set of questions and the chunk IDs that are known to contain relevant information for each question.
+
+For example:
+
+```json
+{
+  "question": "How long does standard shipping take?",
+  "relevant_chunk_ids": ["shipping_policy.txt:2"]
+}
+```
+
+The question is the input to the retrieval system. The `relevant_chunk_ids` field defines the expected relevant result or results.
+
+This is sometimes called **ground truth**, a **golden dataset**, or **relevance labels**.
+
+#### Good evaluation dataset practices
+
+- **Label relevance before evaluating:** Define which chunks are relevant independently of the retrieval results. Otherwise, we risk labeling whatever the system returns as correct.
+- **Cover different question types:** Include questions about prices, time periods, requirements, exceptions, and other facts in the source documents.
+- **Allow multiple relevant chunks:** Some questions require information from more than one chunk. The dataset should allow a list of relevant chunk IDs.
+- **Include difficult cases:** Similar but incorrect chunks are useful. For example, standard shipping and express shipping have different delivery times.
+- **Review the labels:** An evaluation metric is only as trustworthy as its relevance labels.
+
+#### A limitation of chunk IDs
+
+Our current labels use IDs such as `shipping_policy.txt:2`. These IDs depend on the chunking strategy and the order in which chunks are produced.
+
+If chunking changes, an ID might point to a different fact. We must therefore verify or regenerate the relevance labels when the chunking strategy changes.
+
+For a larger project, we may want more stable labels based on source facts or text spans, together with a mapping to the chunks produced by each strategy. This would make comparisons between chunking strategies more reliable.
+
+### Understanding Hit Rate@K
+
+Hit Rate@K measures the proportion of evaluation questions for which at least one relevant chunk appears within the first K retrieved results.
+
+\[
+\text{Hit Rate@K} =
+\frac{\text{Questions with a relevant result in top K}}
+{\text{Total questions}}
+\]
+
+For example, if 8 out of 10 questions have a relevant chunk in the top three results, Hit Rate@3 is 0.80, or 80%.
+
+Hit Rate@K does not measure how high the relevant result appears within the top K. A relevant result at rank 1 and one at rank 3 both count as a hit.
+
+### Understanding Mean Reciprocal Rank (MRR)
+
+MRR measures how highly the first relevant result is ranked.
+
+For each question, we calculate the reciprocal of the rank of its first relevant result. If no relevant result is retrieved, that question contributes zero.
+
+\[
+\text{MRR} =
+\frac{1}{N}\sum_{i=1}^{N}\frac{1}{r_i}
+\]
+
+Here, \(N\) is the number of evaluation questions. For a question with no relevant result, its reciprocal-rank contribution is defined as zero. For questions with a relevant result, \(r_i\) is the rank of the first relevant result.
+
+Examples:
+
+| First relevant result | Reciprocal rank |
+|---|---:|
+| Rank 1 | 1.000 |
+| Rank 2 | 0.500 |
+| Rank 3 | 0.333 |
+| Not retrieved | 0.000 |
+
+MRR rewards systems that place relevant information near the top of the results. Unlike Hit Rate@K, the standard MRR calculation considers the full returned ranking unless a cutoff is explicitly applied.
+
+### Using retrieval metrics together
+
+Hit Rate@K and MRR answer different questions:
+
+- **Hit Rate@K:** How often does retrieval find relevant information within the chosen cutoff?
+- **MRR:** How highly does retrieval rank the first relevant result?
+
+We should usually examine both. We should also inspect individual failed questions rather than relying only on aggregate scores.
+
+For a fair comparison, use the same evaluation questions and relevance labels for each experiment, and record relevant configuration changes such as the chunking strategy, embedding model, and value of K.
+
+A better metric does not automatically prove that the system is better for every user. A small evaluation dataset provides an initial signal, not a guarantee of real-world performance.
 ## 6. Testing retrieval versus testing generated answers
 
 These are different evaluation tasks.

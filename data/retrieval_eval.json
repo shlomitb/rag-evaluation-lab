@@ -1,0 +1,42 @@
+[
+  {
+    "question": "How long does standard shipping take?",
+    "relevant_chunk_ids": ["shipping_policy.txt:2"]
+  },
+  {
+    "question": "How much does standard shipping cost?",
+    "relevant_chunk_ids": ["shipping_policy.txt:0"]
+  },
+  {
+    "question": "What order total qualifies for free standard shipping?",
+    "relevant_chunk_ids": ["shipping_policy.txt:1"]
+  },
+  {
+    "question": "How long does express shipping take?",
+    "relevant_chunk_ids": ["shipping_policy.txt:4"]
+  },
+  {
+    "question": "Are shipping delivery times guaranteed?",
+    "relevant_chunk_ids": ["shipping_policy.txt:5"]
+  },
+  {
+    "question": "How much does the wireless mouse cost?",
+    "relevant_chunk_ids": ["product_catalog.txt:0"]
+  },
+  {
+    "question": "What warranty does the mechanical keyboard have?",
+    "relevant_chunk_ids": ["product_catalog.txt:1"]
+  },
+  {
+    "question": "How many days do I have to return an item?",
+    "relevant_chunk_ids": ["return_policy.txt:0"]
+  },
+  {
+    "question": "Do I need a receipt to return an item?",
+    "relevant_chunk_ids": ["return_policy.txt:2"]
+  },
+  {
+    "question": "How long can I wait to return a defective item?",
+    "relevant_chunk_ids": ["return_policy.txt:5"]
+  }
+]
