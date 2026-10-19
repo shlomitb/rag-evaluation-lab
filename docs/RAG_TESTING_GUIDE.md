@@ -111,114 +111,71 @@ These are primarily deterministic tests: we can specify the expected result with
 
 Retrieval evaluation asks:
 
-**Did the system retrieve the information needed to answer the question, and did it rank that information highly enough?**
+**Did the system retrieve the information needed to answer the question, and how highly did it rank that information?**
 
-To measure this, we need a small evaluation dataset containing questions and the chunk or chunks that are known to be relevant.
-
-This is sometimes called a **golden dataset** or **evaluation dataset**.
-
-For example:
-
-| Question | Relevant chunk |
-|---|---|
-| How long does standard shipping take? | The standard-shipping delivery-time item |
-| What is the price of the wireless mouse? | The wireless-mouse catalog item |
-| How long do I have to return an item? | The standard return-window item |
-
-The expected results are defined before running the retrieval system. This lets us measure its behavior rather than judging it only by whether a result looks plausible.
-
-### Hit Rate@K
-
-Hit Rate@K measures the proportion of evaluation questions for which at least one relevant chunk appears among the top K retrieved results.
-
-For example, if we evaluate 10 questions using the top 3 results and at least one relevant chunk appears in the top 3 for 8 questions:
-
-**Hit Rate@3 = 8 / 10 = 0.80 (80%)**
-
-A higher value means relevant information is found more often within the chosen cutoff.
-
-### Mean Reciprocal Rank (MRR)
-
-MRR measures how highly the first relevant result is ranked.
-
-For one question:
-
-- Relevant result at rank 1: reciprocal rank = 1
-- Relevant result at rank 2: reciprocal rank = 1/2
-- Relevant result at rank 3: reciprocal rank = 1/3
-- No relevant result: reciprocal rank = 0
-
-MRR is the average reciprocal rank across all evaluation questions.
-
-A higher MRR means the first relevant result tends to appear closer to the top.
-
-### Why use both metrics?
-
-Hit Rate@K tells us whether a relevant result appears within the cutoff. MRR tells us whether the first relevant result appears near the top.
-
-A system can have a good Hit Rate@3 but a weaker MRR if it often finds the right chunk only at rank 3.
+To measure this, we need an evaluation dataset containing questions and labels that identify the relevant chunks in our source documents. This is often called a *golden dataset* or *evaluation dataset*. The expected results should be labeled before running retrieval, so we evaluate the system against predefined expectations rather than judging its results by how plausible they look.
 
 ### Building a retrieval evaluation dataset
 
-A retrieval evaluation dataset contains a set of questions and the chunk IDs that are known to contain relevant information for each question.
+Our dataset, `data/retrieval_eval.json`, contains questions of different types, including straightforward questions, paraphrases, exceptions, multi-fact questions, typos, ambiguous questions, and questions that the documents cannot answer.
+
+Each record contains these fields:
+
+- `question`: The question sent to the retriever.
+- `relevant_chunk_ids`: The IDs of chunks labeled as relevant to the question.
+- `answerable`: Whether the source documents contain the information needed to answer the question.
+- `case_type`: The type of question, used to analyze results by category.
+- `require_all_relevant_chunks`: Whether success requires retrieving every labeled relevant chunk. This is particularly important for multi-fact questions.
 
 For example:
 
 ```json
 {
   "question": "How long does standard shipping take?",
-  "relevant_chunk_ids": ["shipping_policy.txt:2"]
+  "relevant_chunk_ids": ["shipping_policy.txt:2"],
+  "answerable": true,
+  "case_type": "baseline",
+  "require_all_relevant_chunks": false
 }
 ```
 
-The question is the input to the retrieval system. The `relevant_chunk_ids` field defines the expected relevant result or results.
-
-This is sometimes called **ground truth**, a **golden dataset**, or **relevance labels**.
+The `relevant_chunk_ids` field defines the expected relevant results. A question may have more than one relevant chunk. However, the evaluator requires all of them only when `require_all_relevant_chunks` is `true`.
 
 #### Good evaluation dataset practices
 
-- **Label relevance before evaluating:** Define which chunks are relevant independently of the retrieval results. Otherwise, we risk labeling whatever the system returns as correct.
-- **Cover different question types:** Include questions about prices, time periods, requirements, exceptions, and other facts in the source documents.
-- **Allow multiple relevant chunks:** Some questions require information from more than one chunk. The dataset should allow a list of relevant chunk IDs.
-- **Include difficult cases:** Similar but incorrect chunks are useful. For example, standard shipping and express shipping have different delivery times.
-- **Review the labels:** An evaluation metric is only as trustworthy as its relevance labels.
+- **Label relevance independently:** Define the expected relevant chunks before evaluating the retriever.
+- **Cover different question types:** Include prices, time periods, requirements, exceptions, paraphrases, and difficult cases.
+- **Allow multiple relevant chunks:** Some questions need information from more than one chunk.
+- **Include unanswerable questions:** These help us investigate whether the system distinguishes available information from missing information.
+- **Review the labels:** Metrics are only as reliable as the relevance labels they use.
 
 #### A limitation of chunk IDs
 
 Our current labels use IDs such as `shipping_policy.txt:2`. These IDs depend on the chunking strategy and the order in which chunks are produced.
 
-If chunking changes, an ID might point to a different fact. We must therefore verify or regenerate the relevance labels when the chunking strategy changes.
+If chunking changes, an ID might refer to a different piece of text. We must therefore verify or regenerate the relevance labels when the chunking strategy changes. For more advanced experiments, stable labels based on source facts or text spans could be mapped to the chunks produced by each strategy.
 
-For a larger project, we may want more stable labels based on source facts or text spans, together with a mapping to the chunks produced by each strategy. This would make comparisons between chunking strategies more reliable.
+### Hit Rate@K
 
-### Understanding Hit Rate@K
-
-Hit Rate@K measures the proportion of evaluation questions for which at least one relevant chunk appears within the first K retrieved results.
+Hit Rate@K measures the proportion of questions for which **at least one relevant chunk appears among the top K retrieved results**.
 
 \[
 \text{Hit Rate@K} =
-\frac{\text{Questions with a relevant result in top K}}
-{\text{Total questions}}
+\frac{\text{Questions with a relevant chunk in the top K}}
+{\text{Total answerable questions}}
 \]
 
-For example, if 8 out of 10 questions have a relevant chunk in the top three results, Hit Rate@3 is 0.80, or 80%.
+For example, if 17 out of 18 answerable questions have at least one relevant chunk in the top three results:
 
-Hit Rate@K does not measure how high the relevant result appears within the top K. A relevant result at rank 1 and one at rank 3 both count as a hit.
+**Hit Rate@3 = 17 / 18 = 0.944 (94.4%)**
 
-### Understanding Mean Reciprocal Rank (MRR)
+A relevant chunk at rank 1 and one at rank 3 both count as a hit. Hit Rate@K tells us whether relevant information was found within the chosen cutoff, but not how highly it was ranked or whether all necessary information was found.
 
-MRR measures how highly the first relevant result is ranked.
+### Mean Reciprocal Rank (MRR)
 
-For each question, we calculate the reciprocal of the rank of its first relevant result. If no relevant result is retrieved, that question contributes zero.
+MRR measures how highly the **first relevant result** is ranked.
 
-\[
-\text{MRR} =
-\frac{1}{N}\sum_{i=1}^{N}\frac{1}{r_i}
-\]
-
-Here, \(N\) is the number of evaluation questions. For a question with no relevant result, its reciprocal-rank contribution is defined as zero. For questions with a relevant result, \(r_i\) is the rank of the first relevant result.
-
-Examples:
+For each question, we calculate the reciprocal of the rank of its first relevant result:
 
 | First relevant result | Reciprocal rank |
 |---|---:|
@@ -227,20 +184,66 @@ Examples:
 | Rank 3 | 0.333 |
 | Not retrieved | 0.000 |
 
-MRR rewards systems that place relevant information near the top of the results. Unlike Hit Rate@K, the standard MRR calculation considers the full returned ranking unless a cutoff is explicitly applied.
+MRR is the average of these reciprocal-rank values across the evaluated questions.
 
-### Using retrieval metrics together
+\[
+\text{MRR} =
+\frac{1}{N}\sum_{i=1}^{N}\frac{1}{r_i}
+\]
 
-Hit Rate@K and MRR answer different questions:
+Here, \(N\) is the number of evaluated questions, and \(r_i\) is the rank of the first relevant result for question \(i\). If no relevant result appears within the evaluated ranking, that question contributes zero.
 
-- **Hit Rate@K:** How often does retrieval find relevant information within the chosen cutoff?
-- **MRR:** How highly does retrieval rank the first relevant result?
+In our current implementation, MRR is calculated using the top K retrieved results. This means its value depends on the configured `top_k`.
 
-We should usually examine both. We should also inspect individual failed questions rather than relying only on aggregate scores.
+A higher MRR means that the first relevant chunk tends to appear closer to the top of the results.
 
-For a fair comparison, use the same evaluation questions and relevance labels for each experiment, and record relevant configuration changes such as the chunking strategy, embedding model, and value of K.
+### Why use both metrics?
 
-A better metric does not automatically prove that the system is better for every user. A small evaluation dataset provides an initial signal, not a guarantee of real-world performance.
+Hit Rate@K and MRR measure different aspects of retrieval:
+
+- **Hit Rate@K:** How often does retrieval find at least one relevant chunk within the cutoff?
+- **MRR:** How highly does retrieval rank the first relevant chunk?
+
+A system can have a high Hit Rate@3 but a lower MRR if it frequently finds the relevant chunk at rank 3 rather than rank 1.
+
+We should examine both metrics and inspect individual failures. Aggregate scores can hide specific weaknesses, such as paraphrased questions that retrieve the correct information only at a lower rank.
+
+### Multi-fact completeness
+
+Some questions require information from more than one chunk. For example:
+
+"What is the standard return window, and what is the exception for defective items?"
+
+Retrieving only the standard return-window chunk does not provide all the information requested.
+
+Our dataset can mark these questions with `require_all_relevant_chunks: true`. The evaluator then checks whether **every labeled relevant chunk appears within the top K results**.
+
+The multi-fact completeness rate is:
+
+\[
+\text{Multi-fact completeness@K} =
+\frac{\text{Multi-fact questions with all required chunks in the top K}}
+{\text{Total multi-fact questions}}
+\]
+
+This is a stricter measure than Hit Rate@K. A question can count as a hit while still failing the multi-fact completeness check.
+
+We report this metric separately because a retriever that finds one relevant chunk may still miss information essential to a complete answer.
+
+### Unanswerable questions
+
+Some questions ask about facts that are not documented in our source material. For example, our product catalog might describe a wireless mouse without specifying whether it supports Bluetooth 5.3.
+
+For these questions, `answerable` is `false` and `relevant_chunk_ids` is an empty list.
+
+Our current evaluator excludes unanswerable questions from Hit Rate@K and MRR, and reports their count separately. Retrieving a related product chunk does not prove that the requested fact is supported by the documents.
+
+**Important limitation:** Counting unanswerable questions is not the same as evaluating whether the system correctly refuses to answer. We will need separate tests of generated answers to check whether the system acknowledges missing information rather than inventing an answer.
+
+### Comparing retrieval experiments
+
+When comparing retrieval configurations, we should use the same evaluation questions
+
 ## 6. Testing retrieval versus testing generated answers
 
 These are different evaluation tasks.
