@@ -502,3 +502,80 @@ We will build and test the system incrementally.
 - [ ] Explore a framework such as Ragas and compare its metrics with our own implementation.
 
 This guide will evolve as we implement each stage and learn from the results.
+
+## Deterministic Answer Evaluation
+
+### Purpose
+
+Retrieval evaluation checks whether the RAG system retrieves relevant document chunks. Answer evaluation checks whether a generated answer contains expected information and avoids specified incorrect claims.
+
+These are separate quality dimensions:
+
+- **Retrieval quality:** Did the system retrieve the information needed to answer the question?
+- **Answer quality:** Did the answer include the expected information, and did it avoid claims explicitly marked as forbidden?
+
+A system can retrieve the correct information but generate an incomplete or incorrect answer. Conversely, a plausible answer does not prove that the correct source information was retrieved.
+
+### Answer-evaluation dataset
+
+The test cases are stored in `data/answer_eval.json`. Each case contains:
+
+- `id`: Unique identifier used to associate answers with evaluation results.
+- `category`: The type of question or evaluation challenge.
+- `question`: The question being evaluated.
+- `required_phrases`: Literal phrases expected in the answer.
+- `forbidden_phrases`: Literal phrases that must not appear in the answer.
+
+The dataset covers factual questions, multi-fact answers, conditions, uncertainty, unsupported information, and policy exceptions across the product catalog, shipping policy, and return policy.
+
+### Deterministic evaluator
+
+`src/answer_evaluation.py` implements `evaluate_answer()`. It returns an `AnswerEvaluation` containing:
+
+- `passed`: Whether all required phrases were found and no forbidden phrases were found.
+- `required_phrases_found`: Required phrases found in the answer.
+- `missing_required_phrases`: Required phrases that were not found.
+- `forbidden_phrases_found`: Forbidden phrases found in the answer.
+- `required_phrase_coverage`: The proportion of required phrases found.
+
+Required-phrase coverage is calculated as the number of required phrases found divided by the number of required phrases. When there are no required phrases, coverage is defined as 1.0.
+
+Phrase matching is case-insensitive and uses substring matching.
+
+### Evaluation runner
+
+`src/answer_evaluation_runner.py` connects the dataset to the evaluator. It loads the JSON dataset, accepts predetermined answers indexed by case ID, evaluates each case, and returns an `AnswerEvaluationReport`.
+
+The report provides:
+
+- Total number of evaluated cases.
+- Number of passing cases.
+- Number of failing cases.
+- Overall pass rate.
+- Individual results containing the case ID, category, question, and detailed evaluation.
+
+The runner checks for missing answers, unexpected answer IDs, duplicate dataset IDs, empty datasets, and answers that are not strings.
+
+### Dataset validation
+
+`tests/test_answer_eval_dataset.py` validates the dataset's structure, including required fields, unique IDs, non-empty questions and categories, phrase-list contents, and the initial expected case count.
+
+`tests/test_answer_evaluation_runner.py` tests result aggregation, case details, pass-rate calculations, invalid answer mappings, non-string answers, and empty datasets.
+
+### Important limitations
+
+This is a deterministic baseline, not a complete measure of semantic answer correctness.
+
+1. **Literal matching:** A correct answer may use different wording and fail because it does not contain an expected phrase.
+2. **Context and negation:** Finding a phrase does not establish that the answer uses it correctly. For example, an answer can contain a required phrase while contradicting it.
+3. **Forbidden-phrase false positives:** A correct answer may mention a forbidden topic in order to explain that the documents do not establish it.
+4. **Limited grounding verification:** The evaluator does not independently verify that each claim is supported by the retrieved documents.
+5. **Pass rate is not overall RAG quality:** The pass rate measures performance on this particular dataset using these particular checks. It should not be interpreted as a universal accuracy score.
+
+These limitations motivate future work on better test-case design, claim grounding, answer completeness, abstention behavior, and semantic evaluation.
+
+### Reproducibility and next steps
+
+The initial runner accepts predetermined answers, allowing its behavior to be tested without calling an LLM. This separates evaluation-code correctness from variability in answer generation.
+
+A subsequent integration can supply answers from the actual RAG pipeline. The evaluation runner can then be used for repeatable regression checks, while retrieval metrics continue to measure retrieval quality independently.

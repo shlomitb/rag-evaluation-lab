@@ -1,0 +1,93 @@
+[
+  {
+    "id": "shipping_01",
+    "category": "factual",
+    "question": "How much does standard shipping cost?",
+    "required_phrases": ["$5.99"],
+    "forbidden_phrases": ["$14.99"]
+  },
+  {
+    "id": "shipping_02",
+    "category": "factual",
+    "question": "How long does standard shipping take?",
+    "required_phrases": ["3–5 business days", "after the order ships"],
+    "forbidden_phrases": []
+  },
+  {
+    "id": "shipping_03",
+    "category": "multi_fact",
+    "question": "What does express shipping cost, and how long does it take?",
+    "required_phrases": ["$14.99", "1–2 business days", "after the order ships"],
+    "forbidden_phrases": ["$5.99"]
+  },
+  {
+    "id": "shipping_04",
+    "category": "condition",
+    "question": "When is standard shipping free?",
+    "required_phrases": ["$50", "free standard shipping"],
+    "forbidden_phrases": []
+  },
+  {
+    "id": "shipping_05",
+    "category": "uncertainty",
+    "question": "Is delivery guaranteed within 3–5 business days?",
+    "required_phrases": ["estimates", "not guaranteed"],
+    "forbidden_phrases": ["delivery is guaranteed"]
+  },
+  {
+    "id": "product_01",
+    "category": "multi_fact",
+    "question": "How much does the wireless mouse cost, and how long does its battery last?",
+    "required_phrases": ["$24.99", "up to 12 months"],
+    "forbidden_phrases": []
+  },
+  {
+    "id": "product_02",
+    "category": "multi_fact",
+    "question": "How many ports does the USB-C Hub have, and what types are they?",
+    "required_phrases": ["6 ports", "2 USB-A", "2 USB-C", "1 HDMI", "1 Ethernet"],
+    "forbidden_phrases": []
+  },
+  {
+    "id": "product_03",
+    "category": "unanswerable",
+    "question": "Does the mechanical keyboard have RGB lighting?",
+    "required_phrases": ["not specified"],
+    "forbidden_phrases": []
+  },
+  {
+    "id": "product_04",
+    "category": "factual",
+    "question": "What warranty does the laptop stand include?",
+    "required_phrases": ["1-year limited warranty"],
+    "forbidden_phrases": ["2-year limited warranty"]
+  },
+  {
+    "id": "return_01",
+    "category": "factual",
+    "question": "How long do customers have to return an item?",
+    "required_phrases": ["30 calendar days", "delivery"],
+    "forbidden_phrases": []
+  },
+  {
+    "id": "return_02",
+    "category": "multi_fact",
+    "question": "What conditions must be met for a standard return?",
+    "required_phrases": ["unused", "original packaging", "receipt", "order confirmation"],
+    "forbidden_phrases": []
+  },
+  {
+    "id": "return_03",
+    "category": "multi_fact",
+    "question": "How long do refunds take, and where are they sent?",
+    "required_phrases": ["5–7 business days", "original payment method"],
+    "forbidden_phrases": []
+  },
+  {
+    "id": "return_04",
+    "category": "exception",
+    "question": "Can a defective item be returned after the standard 30-day window?",
+    "required_phrases": ["60 calendar days", "description of the defect"],
+    "forbidden_phrases": []
+  }
+]
