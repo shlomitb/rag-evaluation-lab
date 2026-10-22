@@ -1,5 +1,8 @@
 
-"""Deterministic checks for expected answer content."""
+"""
+Deterministic checks for expected answer content.
+Checks answer quality using deterministic rules.
+"""
 
 from dataclasses import dataclass
 

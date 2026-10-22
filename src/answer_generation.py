@@ -1,5 +1,8 @@
 
-"""Generate answers using retrieved document chunks."""
+"""
+Defines the TextGenerator interface, builds prompts, and handles the no-context case.
+Generate answers using retrieved document chunks.
+"""
 
 from typing import Protocol
 

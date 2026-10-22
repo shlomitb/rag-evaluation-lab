@@ -1,5 +1,9 @@
 
-"""Evaluate answers produced by the RAG pipeline."""
+"""
+Evaluate answers produced by the RAG pipeline.
+Connects retrieval to answer generation.
+Runs the pipeline while preserving the retrieved evidence for evaluation.
+"""
 
 from pathlib import Path
 from typing import Any
