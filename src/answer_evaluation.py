@@ -2,6 +2,11 @@
 """
 Deterministic checks for expected answer content.
 Checks answer quality using deterministic rules.
+Checis for:
+1. Required phrases: Does the answer contain every required phrase, ignoring capitalization?
+2. Forbidden phrases: Does the answer contain any phrase that must not appear?
+3. Required-phrase coverage: What proportion of the required phrases were found?
+
 """
 
 from dataclasses import dataclass

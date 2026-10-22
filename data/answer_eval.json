@@ -24,15 +24,18 @@
     "id": "shipping_04",
     "category": "condition",
     "question": "When is standard shipping free?",
-    "required_phrases": ["$50", "free standard shipping"],
+    "required_phrases": ["$50", "standard shipping is free"],
     "forbidden_phrases": []
   },
   {
     "id": "shipping_05",
     "category": "uncertainty",
     "question": "Is delivery guaranteed within 3–5 business days?",
-    "required_phrases": ["estimates", "not guaranteed"],
-    "forbidden_phrases": ["delivery is guaranteed"]
+    "required_phrases": [
+      "does not state that delivery is guaranteed",
+      "typically takes 3–5 business days"
+    ],
+    "forbidden_phrases": []
   },
   {
     "id": "product_01",
@@ -52,7 +55,7 @@
     "id": "product_03",
     "category": "unanswerable",
     "question": "Does the mechanical keyboard have RGB lighting?",
-    "required_phrases": ["not specified"],
+    "required_phrases": ["does not mention RGB lighting"],
     "forbidden_phrases": []
   },
   {

@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from src.answer_generation import TextGenerator
 
 
-DEFAULT_MODEL = "gemini-2.5-flash"
+DEFAULT_MODEL = "gemini-3.5-flash-lite"
 
 
 class GeminiTextGenerator:
