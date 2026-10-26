@@ -26,6 +26,7 @@ def answer_question(
         embedding_provider=embedding_provider,
     )
 
+
     return generate_answer(
         question=question,
         retrieved_chunks=retrieved_chunks,

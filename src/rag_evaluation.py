@@ -31,6 +31,9 @@ def evaluate_rag_question(
         embedding_provider=embedding_provider,
     )
 
+    # print("DEBUG: retrieved chunk follows:", flush=True)
+    # print(retrieved_chunks[0], flush=True)
+
     answer = generate_answer(
         question=question,
         retrieved_chunks=retrieved_chunks,
