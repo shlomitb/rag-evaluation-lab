@@ -579,3 +579,16 @@ These limitations motivate future work on better test-case design, claim groundi
 The initial runner accepts predetermined answers, allowing its behavior to be tested without calling an LLM. This separates evaluation-code correctness from variability in answer generation.
 
 A subsequent integration can supply answers from the actual RAG pipeline. The evaluation runner can then be used for repeatable regression checks, while retrieval metrics continue to measure retrieval quality independently.
+
+### Deterministic answer evaluation: phrase matching
+
+The deterministic answer evaluator checks:
+- **Required phrases:** expected information that must appear in the answer.
+- **Forbidden phrases:** information or claims that must not appear.
+- **Required-phrase coverage:** the proportion of required phrases found.
+
+Before matching, the evaluator normalizes text to reduce failures caused by superficial formatting differences. It ignores capitalization, normalizes ASCII punctuation (while preserving dollar signs and hyphens), and collapses repeated whitespace. For example, quotation marks around a phrase or extra spaces should not cause a match to fail.
+
+Normalization has limits. It does not establish that two differently worded statements mean the same thing, verify factual correctness, or determine whether an answer is supported by retrieved evidence. Required-phrase checks can also miss contradictions or unsupported claims.
+
+**Interpretation:** Treat deterministic results as explainable checks of specified answer requirements, not as a complete measure of answer quality. Combine them with retrieval evaluation and faithfulness or other semantic evaluation where appropriate. Review failures to distinguish a genuine answer defect from an overly strict test expectation.
