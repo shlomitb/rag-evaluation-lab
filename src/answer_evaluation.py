@@ -9,6 +9,7 @@ Checis for:
 
 """
 
+import string
 from dataclasses import dataclass
 
 
@@ -21,6 +22,22 @@ class AnswerEvaluation:
     missing_required_phrases: list[str]
     forbidden_phrases_found: list[str]
     required_phrase_coverage: float
+
+
+def _normalize_text(text: str) -> str:
+    """Normalize capitalization, punctuation, and whitespace for phrase matching."""
+    text = text.casefold()
+
+    # Normalize Unicode dash variants to the standard hyphen.
+    text = text.replace("–", "-").replace("—", "-")
+
+    # Preserve dollar signs and hyphens; normalize other ASCII punctuation.
+    punctuation_to_normalize = string.punctuation.replace("$", "").replace("-", "")
+    text = text.translate(
+        str.maketrans({character: " " for character in punctuation_to_normalize})
+    )
+
+    return " ".join(text.split())
 
 
 def evaluate_answer(
@@ -37,24 +54,24 @@ def evaluate_answer(
     if any(not phrase.strip() for phrase in forbidden_phrases):
         raise ValueError("Forbidden phrases cannot be empty.")
 
-    normalized_answer = answer.casefold()
+    normalized_answer = _normalize_text(answer)
 
     required_found = [
         phrase
         for phrase in required_phrases
-        if phrase.casefold() in normalized_answer
+        if _normalize_text(phrase) in normalized_answer
     ]
 
     required_missing = [
         phrase
         for phrase in required_phrases
-        if phrase.casefold() not in normalized_answer
+        if _normalize_text(phrase) not in normalized_answer
     ]
 
     forbidden_found = [
         phrase
         for phrase in forbidden_phrases
-        if phrase.casefold() in normalized_answer
+        if _normalize_text(phrase) in normalized_answer
     ]
 
     if required_phrases:

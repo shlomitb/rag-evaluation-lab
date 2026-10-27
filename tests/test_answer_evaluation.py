@@ -94,3 +94,33 @@ def test_rejects_an_empty_forbidden_phrase():
             forbidden_phrases=[" "],
         )
 
+
+
+def test_phrase_matching_ignores_quotes():
+    result = evaluate_answer(
+        answer='Standard shipping "typically takes" 3-5 business days.',
+        required_phrases=["typically takes"],
+    )
+
+    assert result.passed is True
+    assert result.required_phrases_found == ["typically takes"]
+
+
+def test_phrase_matching_ignores_punctuation_differences():
+    result = evaluate_answer(
+        answer="Standard shipping typically takes 3-5 business days.",
+        required_phrases=["typically takes,"],
+    )
+
+    assert result.passed is True
+    assert result.required_phrases_found == ["typically takes,"]
+
+
+def test_phrase_matching_ignores_extra_whitespace():
+    result = evaluate_answer(
+        answer="Standard shipping typically   takes 3-5 business days.",
+        required_phrases=["typically takes"],
+    )
+
+    assert result.passed is True
+    assert result.required_phrases_found == ["typically takes"]
